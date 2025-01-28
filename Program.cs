@@ -1422,8 +1422,9 @@ namespace ConsolePasNakl
         {
             double ks = ksInitial; // Начальное значение ks
             int iterations = 0;
-            double max_ks = 4;
+            double max_ks = ksInitial + 8;
             int max_iterations = 20_000;
+            int try_num = 1;
 
             int xM = 1;
             int xN = NLine;
@@ -1448,16 +1449,22 @@ namespace ConsolePasNakl
                 if (iterations > max_iterations)
                 {
                     max_ks *= 2;
-                    max_iterations += 20_000;
+                    max_iterations += 10_000;
 
                     iterations = 1;
                 }
-                else if (max_ks > 1e4)
+                else if (max_ks > 2e2)
                 {
-                    max_ks = 4;
+                    max_ks = ksInitial + 8;
                     max_iterations = 20_000;
 
                     iterations = 1;
+                    try_num += 1;
+                }
+
+                if (try_num > 3)
+                {
+                    return Double.MinValue;
                 }
 
                 // Вычисляем первую и вторую производные
@@ -1469,7 +1476,7 @@ namespace ConsolePasNakl
                 ks -= step; // Обновляем значение ks
 
                 // Проверяем, чтобы ks оставался положительным
-                if (ks <= 0 || Math.Abs(step) < 1e-6)
+                if (ks <= ksInitial || Math.Abs(step) < 1e-6)
                 {
                     Random rand = new Random();
                     ks = rand.NextDouble() * max_ks + 2.366; // Присваиваем случайное положительное значение
@@ -1488,12 +1495,16 @@ namespace ConsolePasNakl
         }
 
         // Основная функция, которая использует оптимизацию
-        private static void CalcOD_N(int aM, int aN)
+        private static bool CalcOD_N(int aM, int aN)
         {
             double ksInitial = 2.366; // Начальное значение ks
 
             // Оптимизируем ks, чтобы отношение sin1/sig2 было в нужном интервале
             double optimizedKs = OptimizeKs(aM, aN, ksInitial, aPr0, aPrK);
+
+            if (optimizedKs == Double.MinValue) {
+                return false;
+            }
 
             double sg1 = CalculateSg1Obl3(optimizedKs);
 
@@ -1501,6 +1512,8 @@ namespace ConsolePasNakl
 
             SetA(arKsi, aM, aN, optimizedKs);
             SetA(arSig, aM, aN, sg1);
+
+            return true;
         }
 
         // Процедура CalcOD
@@ -1599,53 +1612,64 @@ namespace ConsolePasNakl
             // Метод для формирования строки с данными
             public static string Calc3()
             {
-                result = new StringBuilder();
-                result.AppendLine($"NLine={NLine}");
-                result.AppendLine($"RO0  ={Ro0:F4}, RO90  ={Ro90:F4}");
-                result.AppendLine($"DRO0 ={dRo0:F4}, DRO90 ={dRo90:F4}");
-                result.AppendLine($"DE1 ={de1:F4}, DE2 ={de2:F4}");
-                result.AppendLine($"MU   ={MU:F4}, P0    ={P0:F4}");
-                result.AppendLine($"DMu0Y={dMu0y:F4}, DMu90Y={dMu90y:F4}");
-                result.AppendLine();
+                bool is_calculated = true;
 
-                int NPoint = NLine + ((NLine - 1) * NLine / 2) - 1;
-                int NWork = 0;
-
-                for (int mi = 0; mi <= NLine; mi++)
+                do
                 {
-                    result.AppendLine($"M:N ={mi,2} : {0,2}  {X(mi, 0),7:F4}  {Y(mi, 0),7:F4}  {Ksi(mi, 0),7:F4}  {Sig(mi, 0),7:F4}  {PPmn(mi, 0),7:F4}");
-                }
+                    is_calculated = true;
 
-                for (int ni = 1; ni <= NLine; ni++)
-                {
-                    SetA(arX, ni, ni, Xmn(ni, ni));
-                    SetA(arY, ni, ni, 0);
-                    CalcOD_N(ni, ni);
-                    // CalcOD(ni, ni);
-
+                    result = new StringBuilder();
+                    result.AppendLine($"NLine={NLine}");
+                    result.AppendLine($"RO0  ={Ro0:F4}, RO90  ={Ro90:F4}");
+                    result.AppendLine($"DRO0 ={dRo0:F4}, DRO90 ={dRo90:F4}");
+                    result.AppendLine($"DE1 ={de1:F4}, DE2 ={de2:F4}");
+                    result.AppendLine($"MU   ={MU:F4}, P0    ={P0:F4}");
+                    result.AppendLine($"DMu0Y={dMu0y:F4}, DMu90Y={dMu90y:F4}");
                     result.AppendLine();
-                    result.AppendLine($"M:N ={ni,2} : {ni,2}  {X(ni, ni),7:F4}  {Y(ni, ni),7:F4}  {Ksi(ni, ni),7:F4}  {Sig(ni, ni),7:F4}  {PPmn(ni, ni),7:F4}");
 
-                    for (int mi = ni + 1; mi <= NLine; mi++)
+                    int NPoint = NLine + ((NLine - 1) * NLine / 2) - 1;
+                    int NWork = 0;
+
+                    for (int mi = 0; mi <= NLine; mi++)
                     {
-                        Console.Write($"M:N ={mi,2} : {ni,2}     ({NWork * 100.0 / NPoint,4:F1}%)    \r");
-
-                        SetA(arX, mi, ni, Xmn(mi, ni));
-                        SetA(arY, mi, ni, Ymn(mi, ni));
-                        SetA(arKsi, mi, ni, Ksimn(mi, ni));
-                        SetA(arSig, mi, ni, Sigmn(mi, ni));
-
-                        result.AppendLine($"M:N ={mi,2} : {ni,2}  {X(mi, ni),7:F4}  {Y(mi, ni),7:F4}  {Ksi(mi, ni),7:F4}  {Sig(mi, ni),7:F4}  {PPmn(mi, ni),7:F4}");
-
-                        if (Console.KeyAvailable)
-                        {
-                            char Ch = Console.ReadKey(true).KeyChar;
-                            if (Ch == (char)27) Environment.Exit(0); // ESC
-                        }
-
-                        NWork++;
+                        result.AppendLine($"M:N ={mi,2} : {0,2}  {X(mi, 0),7:F4}  {Y(mi, 0),7:F4}  {Ksi(mi, 0),7:F4}  {Sig(mi, 0),7:F4}  {PPmn(mi, 0),7:F4}");
                     }
-                }
+
+                    for (int ni = 1; ni <= NLine && is_calculated; ni++)
+                    {
+                        SetA(arX, ni, ni, Xmn(ni, ni));
+                        SetA(arY, ni, ni, 0);
+                        is_calculated = CalcOD_N(ni, ni);
+
+                        result.AppendLine();
+                        result.AppendLine($"M:N ={ni,2} : {ni,2}  {X(ni, ni),7:F4}  {Y(ni, ni),7:F4}  {Ksi(ni, ni),7:F4}  {Sig(ni, ni),7:F4}  {PPmn(ni, ni),7:F4}");
+
+                        for (int mi = ni + 1; mi <= NLine && is_calculated; mi++)
+                        {
+                            Console.Write($"M:N ={mi,2} : {ni,2}     ({NWork * 100.0 / NPoint,4:F1}%)    \r");
+
+                            SetA(arX, mi, ni, Xmn(mi, ni));
+                            SetA(arY, mi, ni, Ymn(mi, ni));
+                            SetA(arKsi, mi, ni, Ksimn(mi, ni));
+                            SetA(arSig, mi, ni, Sigmn(mi, ni));
+
+                            result.AppendLine($"M:N ={mi,2} : {ni,2}  {X(mi, ni),7:F4}  {Y(mi, ni),7:F4}  {Ksi(mi, ni),7:F4}  {Sig(mi, ni),7:F4}  {PPmn(mi, ni),7:F4}");
+
+                            if (Console.KeyAvailable)
+                            {
+                                char Ch = Console.ReadKey(true).KeyChar;
+                                if (Ch == (char)27) Environment.Exit(0); // ESC
+                            }
+
+                            NWork++;
+                        }
+                    }
+
+                    if (!is_calculated)
+                    {
+                        Console.WriteLine("\nНе удалось просчитать, производится повторная попытка расчета 3 области\n");
+                    }
+                } while (!is_calculated);
 
                 return result.ToString();
             }
