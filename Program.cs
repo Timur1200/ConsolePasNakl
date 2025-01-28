@@ -1422,6 +1422,8 @@ namespace ConsolePasNakl
         {
             double ks = ksInitial; // Начальное значение ks
             int iterations = 0;
+            double max_ks = 4;
+            int max_iterations = 20_000;
 
             int xM = 1;
             int xN = NLine;
@@ -1443,6 +1445,21 @@ namespace ConsolePasNakl
             // Итерации до тех пор, пока ratio не окажется в пределах [aPr0, aPrK]
             while (ratio < aPr0 || ratio > aPrK)
             {
+                if (iterations > max_iterations)
+                {
+                    max_ks *= 2;
+                    max_iterations += 20_000;
+
+                    iterations = 1;
+                }
+                else if (max_ks > 1e4)
+                {
+                    max_ks = 4;
+                    max_iterations = 20_000;
+
+                    iterations = 1;
+                }
+
                 // Вычисляем первую и вторую производные
                 double derivative = CalculateDerivative(ks, aM, aN);
                 double secondDerivative = CalculateSecondDerivative(ks, aM, aN);
@@ -1455,7 +1472,7 @@ namespace ConsolePasNakl
                 if (ks <= 0 || Math.Abs(step) < 1e-6)
                 {
                     Random rand = new Random();
-                    ks = rand.NextDouble() * 200 + 2.366; // Присваиваем случайное положительное значение (в пределах от 1e-6 до 10)
+                    ks = rand.NextDouble() * max_ks + 2.366; // Присваиваем случайное положительное значение
                     // Console.WriteLine("ks стало отрицательным. Рандомизируем его значение: ks = {0:F6}", ks);
                 }
 
