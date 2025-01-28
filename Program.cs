@@ -6,8 +6,7 @@ namespace ConsolePasNakl
 {
     internal class Program
     {
-       
-             private const string EOL = "\r\n";
+        private const string EOL = "\r\n";
 
         // Типы данных
         private delegate double ArrReal(int m, int n); // Заменим указатели на массивы делегатами для доступа к элементам
@@ -26,6 +25,7 @@ namespace ConsolePasNakl
         private static double de2;
         private static double aPr0;
         private static double aPrK;
+
         static void LoadConfig(string filePath)
         {
             var json = File.ReadAllText(filePath);
@@ -46,11 +46,12 @@ namespace ConsolePasNakl
             aPr0 = config.aPr0;
             aPrK = config.aPrK;
         }
+
         // Переменные
         private static string WorkDir;   // Каталог, из которого запущена программа
         private static int ArrSize;
-       
-        
+
+
         private static double Alpha;
 
         private static double[] arX;    // Заменим указатели на массивы
@@ -185,7 +186,7 @@ namespace ConsolePasNakl
             if (c == 0) return 99999999; // Аналог обработки деления на ноль
             return Math.Sin(angle) / c;
         }
-       
+
 
         // Функция Ro_FiFimn
         private static double Ro_FiFimn(int aM, int aN)
@@ -492,7 +493,7 @@ namespace ConsolePasNakl
                    (ss * Bmn(aM, aN) + Lmn(aM, aN)) * (Amn(aM, aN) - Numn(aM, aN) * Math.Sin(rr));
         }
 
-        
+
 
         // Вспомогательная функция Sec (аналог sec из Pascal)
         private static double Sec(double angle)
@@ -850,7 +851,7 @@ namespace ConsolePasNakl
             public double aPrK { get; set; } // Верхний предел для kp
         }
         private static Data data = new Data();
-        
+
 
         // Вспомогательные функции
 
@@ -911,7 +912,7 @@ namespace ConsolePasNakl
         // Процедура CalcOA
         public static class Obl1
         {
-            
+
 
             public static List<DataPoint> DataPoints { get; set; } = new List<DataPoint>();
 
@@ -925,7 +926,7 @@ namespace ConsolePasNakl
                 }
                 return stringBuilder;
             }
-            public  class DataPoint
+            public class DataPoint
             {
                 public int M { get; set; }
                 public int N { get; set; }
@@ -943,15 +944,40 @@ namespace ConsolePasNakl
             double ks = 55 * Math.PI / 180 - dKs;
             char Ch = '\0';
 
-            
+            double cos_de_1 = Math.Cos(de1);
+            double sin_de_1 = Math.Sin(de1);
+            double x_i_ks_0 = Xi(ks, 0);
+            double n_ks_0 = N(ks, 0);
+            double c_f_i_ks_0 = C_Fi(ks, 0);
+            double k_f_i_ks_0 = K_Fi(ks, 0);
+            double ro_ks_0 = Ro(ks, 0);
+            double c_ks_0 = C(ks, 0);
+            double m_ks_0 = M(ks, 0);
+            double k_ks_0 = K(ks, 0);
+
+            double cos_spec__ks__ro_ks_0 = Math.Cos(2 * ks - ro_ks_0);
+            double sin_spec__ks__ro_ks_0 = Math.Sin(2 * ks - ro_ks_0);
 
             do
             {
                 ks += dKs;
-                sg1 = (P0 * Math.Cos(de1) / Xi(ks, 0) + C(ks, 0) * N(ks, 0) + 0.5 * C_Fi(ks, 0) * Math.Cos(2 * ks - Ro(ks, 0))) /
-                              (1 / Xi(ks, 0) - K(ks, 0) * N(ks, 0) - 0.5 * K_Fi(ks, 0) * Math.Cos(2 * ks - Ro(ks, 0)));
-                sg2 = (C_Fi(ks, 0) * Math.Sin(2 * ks - Ro(ks, 0)) - P0 * Math.Sin(de1) / Xi(ks, 0) - 2 * C(ks, 0) * M(ks, 0)) /
-                              (2 * K(ks, 0) * M(ks, 0) - K_Fi(ks, 0) * Math.Sin(2 * ks - Ro(ks, 0)));
+
+                // Промежуточные данные
+                x_i_ks_0 = Xi(ks, 0);
+                n_ks_0 = N(ks, 0);
+                c_f_i_ks_0 = C_Fi(ks, 0);
+                k_f_i_ks_0 = K_Fi(ks, 0);
+                ro_ks_0 = Ro(ks, 0);
+                c_ks_0 = C(ks, 0);
+                m_ks_0 = M(ks, 0);
+                k_ks_0 = K(ks, 0);
+                cos_spec__ks__ro_ks_0 = Math.Cos(2 * ks - ro_ks_0);
+                sin_spec__ks__ro_ks_0 = Math.Sin(2 * ks - ro_ks_0);
+
+                sg1 = (P0 * cos_de_1 / x_i_ks_0 + c_ks_0 * n_ks_0 + 0.5 * c_f_i_ks_0 * cos_spec__ks__ro_ks_0) /
+                              (1 / x_i_ks_0 - k_ks_0 * n_ks_0 - 0.5 * k_f_i_ks_0 * cos_spec__ks__ro_ks_0);
+                sg2 = (c_f_i_ks_0 * sin_spec__ks__ro_ks_0 - P0 * sin_de_1 / x_i_ks_0 - 2 * c_ks_0 * m_ks_0) /
+                              (2 * k_ks_0 * m_ks_0 - k_f_i_ks_0 * sin_spec__ks__ro_ks_0);
                 kp = sg1 / sg2;
 
                 if (Console.KeyAvailable)
@@ -987,8 +1013,6 @@ namespace ConsolePasNakl
                     Sig = Sig(mi, ni)
                 });
             }
-
-            
         }
 
         private static void Calc1()
@@ -1028,8 +1052,6 @@ namespace ConsolePasNakl
                     NWork++;
                 }
             }
-
-            
         }
 
         // Процедура OutRes1
@@ -1125,18 +1147,43 @@ namespace ConsolePasNakl
             SetA(arKsi, 0, 2, Ksi(0, 0));
             SetA(arSig, 0, 2, Sig(0, 0));
 
-            
+            double tg_de_2 = Tg(de2);
+
+            double c_fi_ks_0 = C_Fi(ks, 0);
+            double ro_ks_0 = Ro(ks, 0);
+            double k_fi_ks_0 = K_Fi(ks, 0);
+            double k_ks_0 = K(ks, 0);
+            double m_ks_0 = M(ks, 0);
+            double c_ks_0 = C(ks, 0);
+            double n_ks_0 = N(ks, 0);
+            double x_i_ks_0 = Xi(ks, 0);
+
+            double sin_spec__ks__de_2__ro_ks_0 = Math.Sin(2 * ks - de2 - ro_ks_0);
+            double cos_spec__ks__de_2__ro_ks_0 = Math.Cos(2 * ks - de2 - ro_ks_0);
 
             do
             {
                 ks += dKs;
                 if (ks < 2.35) dKs = 0.03; else dKs = 0.00005;
 
+                // Промежуточные вычисления
+                c_fi_ks_0 = C_Fi(ks, 0);
+                ro_ks_0 = Ro(ks, 0);
+                k_fi_ks_0 = K_Fi(ks, 0);
+                k_ks_0 = K(ks, 0);
+                m_ks_0 = M(ks, 0);
+                c_ks_0 = C(ks, 0);
+                n_ks_0 = N(ks, 0);
+                x_i_ks_0 = Xi(ks, 0);
+
+                cos_spec__ks__de_2__ro_ks_0 = Math.Cos(2 * ks - de2 - ro_ks_0);
+                sin_spec__ks__de_2__ro_ks_0 = Math.Sin(2 * ks - de2 - ro_ks_0);
+
                 double sg1 = Sig(0, 2) + G2mn(0, 3) * dKs / D2mn(0, 3);
-                double sg2 = ((C(ks, 0) * N(ks, 0) + 0.5 * C_Fi(ks, 0) * Math.Cos(2 * ks - de2 - Ro(ks, 0))) * Tg(de2) +
-                              0.5 * (C_Fi(ks, 0) * Math.Sin(2 * ks - de2 - Ro(ks, 0)) - 2 * C(ks, 0) * M(ks, 0))) /
-                              ((1 / Xi(ks, 0) - K(ks, 0) * N(ks, 0) + 0.5 * K_Fi(ks, 0) * Math.Cos(2 * ks - de2 - Ro(ks, 0))) * Tg(de2) +
-                               0.5 * (2 * K(ks, 0) * M(ks, 0) - K_Fi(ks, 0) * Math.Sin(2 * ks - de2 - Ro(ks, 0))));
+                double sg2 = ((c_ks_0 * n_ks_0 + 0.5 * c_fi_ks_0 * cos_spec__ks__de_2__ro_ks_0) * tg_de_2 +
+                              0.5 * (c_fi_ks_0 * sin_spec__ks__de_2__ro_ks_0 - 2 * c_ks_0 * m_ks_0)) /
+                              ((1 / x_i_ks_0 - k_ks_0 * n_ks_0 + 0.5 * k_fi_ks_0 * cos_spec__ks__de_2__ro_ks_0) * tg_de_2 +
+                               0.5 * (2 * k_ks_0 * m_ks_0 - k_fi_ks_0 * sin_spec__ks__de_2__ro_ks_0));
 
                 SetA(arKsi, 0, 2, ks);
                 SetA(arSig, 0, 2, sg1);
@@ -1182,8 +1229,6 @@ namespace ConsolePasNakl
                 SetA(arX, 0, i, 0);
                 SetA(arY, 0, i, 0);
             }
-
-           
         }
 
         private static void Calc2()
@@ -1235,20 +1280,20 @@ namespace ConsolePasNakl
                 }
             }
 
-           
+
         }
 
-        static void  OutRes2()
+        static void OutRes2()
         {
             Res2.ToText();
         }
 
         public static class Res2
         {
-             // Пример значения, замените на актуальное
+            // Пример значения, замените на актуальное
 
             // Пример вспомогательных функций (замените на реальные)
-           
+
 
             public static string ToText()
             {
@@ -1299,13 +1344,85 @@ namespace ConsolePasNakl
             }
         }
 
-        // Процедура CalcOD
-        private static void CalcOD(int aM, int aN)
+        private static double CalculateSg1Obl3(double ks)
         {
-            char Ch = '\0';
-            double dKs = 0.5;
-            double ks = 2.366;
-            double kp,sg1;
+            int xM = 1;
+            int xN = NLine;
+
+            double d2_mn = D2mn(xM, xN);
+
+            return Sig(xM, xN - 1) +
+                        G2mn(xM, xN) / d2_mn * (Ksi(xM, xN) - Ksi(xM, xN - 1)) +
+                        T2mn(xM, xN) / d2_mn;
+        }
+
+        private static double CalculateSg2Obl3(double ks)
+        {
+
+            double tg_de_2 = Tg(de2);
+
+            double c_ks_0 = C(ks, 0),
+                    n_ks_0 = N(ks, 0),
+                    c_f_i_ks_0 = C_Fi(ks, 0),
+                    ro_ks_0 = Ro(ks, 0),
+                    k_ks_0 = K(ks, 0),
+                    k_f_i_ks_0 = K_Fi(ks, 0),
+                    x_i_ks_0 = Xi(ks, 0),
+                    m_ks_0 = M(ks, 0);
+
+            double cos_spec__ks__de_2__ro_ks_0 = Math.Cos(2 * ks - de2 - ro_ks_0);
+            double sin_spec__ks__de_2__ro_ks_0 = Math.Sin(2 * ks - de2 - ro_ks_0);
+
+            return ((c_ks_0 * n_ks_0 + 0.5 * c_f_i_ks_0 * cos_spec__ks__de_2__ro_ks_0) * tg_de_2 +
+                          0.5 * (c_f_i_ks_0 * sin_spec__ks__de_2__ro_ks_0 - 2 * c_ks_0 * m_ks_0)) /
+                          ((1 / x_i_ks_0 - k_ks_0 * n_ks_0 + 0.5 * k_f_i_ks_0 * cos_spec__ks__de_2__ro_ks_0) * tg_de_2 +
+                           0.5 * (2 * k_ks_0 * m_ks_0 - k_f_i_ks_0 * sin_spec__ks__de_2__ro_ks_0));
+        }
+
+        // Функция для вычисления отношения sin1 / sig2
+        private static double CalculateRatio(double ks, int aM, int aN)
+        {
+            double sg1 = CalculateSg1Obl3(ks);
+
+            double sg2 = CalculateSg2Obl3(ks);
+
+            double kp = sg1 / sg2;
+
+            Console.Write($"ks= {ks:F3} sg1 / sg2 ={sg1,8:F3} : {sg2,8:F3} = {kp:F4}\r");
+            
+            return sg1 / sg2;
+        }
+
+        // Функция для вычисления первой производной отношения sin1 / sig2 по ks
+        private static double CalculateDerivative(double ks, int aM, int aN)
+        {
+            double delta = 1e-5; // Малое изменение для численного дифференцирования
+
+            // Используем приближенное численное дифференцирование
+            double ratioPlus = CalculateRatio(ks + delta, aM, aN);
+            double ratioMinus = CalculateRatio(ks - delta, aM, aN);
+
+            return (ratioPlus - ratioMinus) / (2 * delta); // Центральная разность
+        }
+
+        // Функция для вычисления второй производной отношения sin1 / sig2 по ks
+        private static double CalculateSecondDerivative(double ks, int aM, int aN)
+        {
+            double delta = 1e-5; // Малое изменение для численного дифференцирования
+
+            // Используем приближенное численное дифференцирование
+            double derivativePlus = CalculateDerivative(ks + delta, aM, aN);
+            double derivativeMinus = CalculateDerivative(ks - delta, aM, aN);
+
+            return (derivativePlus - derivativeMinus) / (2 * delta); // Центральная разность
+        }
+
+        // Функция для оптимизации методом Ньютона
+        private static double OptimizeKs(int aM, int aN, double ksInitial, double aPr0, double aPrK)
+        {
+            double ks = ksInitial; // Начальное значение ks
+            int iterations = 0;
+
             int xM = 1;
             int xN = NLine;
 
@@ -1319,22 +1436,123 @@ namespace ConsolePasNakl
             SetA(arKsi, 1, xN - 1, Ksi(aM, aN - 1));
             SetA(arSig, 1, xN - 1, Sig(aM, aN - 1));
 
+            SetA(arKsi, xM, xN, ks);
+
+            double ratio = CalculateRatio(ks, aM, aN);
+
+            // Итерации до тех пор, пока ratio не окажется в пределах [aPr0, aPrK]
+            while (ratio < aPr0 || ratio > aPrK)
+            {
+                // Вычисляем первую и вторую производные
+                double derivative = CalculateDerivative(ks, aM, aN);
+                double secondDerivative = CalculateSecondDerivative(ks, aM, aN);
+
+                // Обновление ks по методу Ньютона
+                double step = derivative / secondDerivative;
+                ks -= step; // Обновляем значение ks
+
+                // Проверяем, чтобы ks оставался положительным
+                if (ks <= 0 || Math.Abs(step) < 1e-6)
+                {
+                    Random rand = new Random();
+                    ks = rand.NextDouble() * 200 + 2.366; // Присваиваем случайное положительное значение (в пределах от 1e-6 до 10)
+                    // Console.WriteLine("ks стало отрицательным. Рандомизируем его значение: ks = {0:F6}", ks);
+                }
+
+                // Проверяем значение ratio
+                SetA(arKsi, xM, xN, ks);
+
+                ratio = CalculateRatio(ks, aM, aN);
+
+                iterations++;
+            }
+
+            return ks;
+        }
+
+        // Основная функция, которая использует оптимизацию
+        private static void CalcOD_N(int aM, int aN)
+        {
+            double ksInitial = 2.366; // Начальное значение ks
+
+            // Оптимизируем ks, чтобы отношение sin1/sig2 было в нужном интервале
+            double optimizedKs = OptimizeKs(aM, aN, ksInitial, aPr0, aPrK);
+
+            double sg1 = CalculateSg1Obl3(optimizedKs);
+
+            Console.WriteLine();
+
+            SetA(arKsi, aM, aN, optimizedKs);
+            SetA(arSig, aM, aN, sg1);
+        }
+
+        // Процедура CalcOD
+        private static void CalcOD(int aM, int aN)
+        {
+            char Ch = '\0';
+            double dKs = 0.001;
+            double ks = 2.366;
+            double kp, sg1;
+            int xM = 1;
+            int xN = NLine;
+
+            SetA(arX, 0, xN - 1, X(aM - 1, aN - 1));
+            SetA(arY, 0, xN - 1, Y(aM - 1, aN - 1));
+            SetA(arKsi, 0, xN - 1, Ksi(aM - 1, aN - 1));
+            SetA(arSig, 0, xN - 1, Sig(aM - 1, aN - 1));
+
+            SetA(arX, 1, xN - 1, X(aM, aN - 1));
+            SetA(arY, 1, xN - 1, Y(aM, aN - 1));
+            SetA(arKsi, 1, xN - 1, Ksi(aM, aN - 1));
+            SetA(arSig, 1, xN - 1, Sig(aM, aN - 1));
+
+            double tg_de_2 = Tg(de2);
+
+            double c_ks_0 = C(ks, 0);
+            double n_ks_0 = N(ks, 0);
+            double c_f_i_ks_0 = C_Fi(ks, 0);
+            double ro_ks_0 = Ro(ks, 0);
+            double k_ks_0 = K(ks, 0);
+            double k_f_i_ks_0 = K_Fi(ks, 0);
+            double x_i_ks_0 = Xi(ks, 0);
+            double m_ks_0 = M(ks, 0);
+
+            double cos_spec__ks__de_2__ro_ks_0 = Math.Cos(2 * ks - de2 - ro_ks_0);
+            double sin_spec__ks__de_2__ro_ks_0 = Math.Sin(2 * ks - de2 - ro_ks_0);
+
+            double d2_mn = 0.0;
+
             do
             {
                 ks += dKs;
 
                 SetA(arKsi, xM, xN, ks);
 
-                 sg1 = Sig(xM, xN - 1) +
-                             G2mn(xM, xN) / D2mn(xM, xN) * (Ksi(xM, xN) - Ksi(xM, xN - 1)) +
-                             T2mn(xM, xN) / D2mn(xM, xN);
+                // Промежуточные вычисления
+                c_ks_0 = C(ks, 0);
+                n_ks_0 = N(ks, 0);
+                c_f_i_ks_0 = C_Fi(ks, 0);
+                ro_ks_0 = Ro(ks, 0);
+                k_ks_0 = K(ks, 0);
+                k_f_i_ks_0 = K_Fi(ks, 0);
+                x_i_ks_0 = Xi(ks, 0);
+                m_ks_0 = M(ks, 0);
 
-                double sg2 = ((C(ks, 0) * N(ks, 0) + 0.5 * C_Fi(ks, 0) * Math.Cos(2 * ks - de2 - Ro(ks, 0))) * Tg(de2) +
-                              0.5 * (C_Fi(ks, 0) * Math.Sin(2 * ks - de2 - Ro(ks, 0)) - 2 * C(ks, 0) * M(ks, 0))) /
-                              ((1 / Xi(ks, 0) - K(ks, 0) * N(ks, 0) + 0.5 * K_Fi(ks, 0) * Math.Cos(2 * ks - de2 - Ro(ks, 0))) * Tg(de2) +
-                               0.5 * (2 * K(ks, 0) * M(ks, 0) - K_Fi(ks, 0) * Math.Sin(2 * ks - de2 - Ro(ks, 0))));
+                cos_spec__ks__de_2__ro_ks_0 = Math.Cos(2 * ks - de2 - ro_ks_0);
+                sin_spec__ks__de_2__ro_ks_0 = Math.Sin(2 * ks - de2 - ro_ks_0);
 
-                 kp = sg1 / sg2;
+                d2_mn = D2mn(xM, xN);
+
+                sg1 = Sig(xM, xN - 1) +
+                            G2mn(xM, xN) / d2_mn * (Ksi(xM, xN) - Ksi(xM, xN - 1)) +
+                            T2mn(xM, xN) / d2_mn;
+
+                double sg2 = ((c_ks_0 * n_ks_0 + 0.5 * c_f_i_ks_0 * cos_spec__ks__de_2__ro_ks_0) * tg_de_2 +
+                              0.5 * (c_f_i_ks_0 * sin_spec__ks__de_2__ro_ks_0 - 2 * c_ks_0 * m_ks_0)) /
+                              ((1 / x_i_ks_0 - k_ks_0 * n_ks_0 + 0.5 * k_f_i_ks_0 * cos_spec__ks__de_2__ro_ks_0) * tg_de_2 +
+                               0.5 * (2 * k_ks_0 * m_ks_0 - k_f_i_ks_0 * sin_spec__ks__de_2__ro_ks_0));
+
+                kp = sg1 / sg2;
 
                 Console.Write($"ks= {ks:F3} sg1 / sg2 ={sg1,8:F3} : {sg2,8:F3} = {kp:F4}\r");
 
@@ -1349,23 +1567,21 @@ namespace ConsolePasNakl
             SetA(arKsi, aM, aN, ks);
             SetA(arSig, aM, aN, sg1);
         }
-       static void Calc3()
+
+        static void Calc3()
         {
             Obl3.Calc3();
         }
+
         // Процедура Calc3
         public static class Obl3
         {
             // Исходные данные
-           
-
-            
-            
             public static StringBuilder result = new StringBuilder();
+
             // Метод для формирования строки с данными
             public static string Calc3()
             {
-               
                 result = new StringBuilder();
                 result.AppendLine($"NLine={NLine}");
                 result.AppendLine($"RO0  ={Ro0:F4}, RO90  ={Ro90:F4}");
@@ -1380,7 +1596,6 @@ namespace ConsolePasNakl
 
                 for (int mi = 0; mi <= NLine; mi++)
                 {
-                    
                     result.AppendLine($"M:N ={mi,2} : {0,2}  {X(mi, 0),7:F4}  {Y(mi, 0),7:F4}  {Ksi(mi, 0),7:F4}  {Sig(mi, 0),7:F4}  {PPmn(mi, 0),7:F4}");
                 }
 
@@ -1388,14 +1603,14 @@ namespace ConsolePasNakl
                 {
                     SetA(arX, ni, ni, Xmn(ni, ni));
                     SetA(arY, ni, ni, 0);
-                    CalcOD(ni, ni);
+                    CalcOD_N(ni, ni);
+                    // CalcOD(ni, ni);
 
                     result.AppendLine();
                     result.AppendLine($"M:N ={ni,2} : {ni,2}  {X(ni, ni),7:F4}  {Y(ni, ni),7:F4}  {Ksi(ni, ni),7:F4}  {Sig(ni, ni),7:F4}  {PPmn(ni, ni),7:F4}");
 
                     for (int mi = ni + 1; mi <= NLine; mi++)
                     {
-                       
                         Console.Write($"M:N ={mi,2} : {ni,2}     ({NWork * 100.0 / NPoint,4:F1}%)    \r");
 
                         SetA(arX, mi, ni, Xmn(mi, ni));
@@ -1413,16 +1628,16 @@ namespace ConsolePasNakl
 
                         NWork++;
                     }
-                    
                 }
 
                 return result.ToString();
             }
+
             static public StringBuilder ToText()
             {
                 return result;
-                
             }
+
             // Пример массива (замените на реальные данные)
             //private static double[,] arX = new double[100, 100];
             //private static double[,] arY = new double[100, 100];
@@ -1449,9 +1664,6 @@ namespace ConsolePasNakl
         }
 
         // Вспомогательные функции
-
-
-
         private static void LoadIni()
         {
             // Установка значений по умолчанию или из внешнего источника
@@ -1476,44 +1688,51 @@ namespace ConsolePasNakl
         static void Main(string[] args)
         {
             LoadConfig("config.json");
+
             // ------ Инициализация ------
             LoadIni(); // Загрузка начальных параметров
             Init();    // Инициализация данных
+
             Console.WriteLine($"NLine={NLine}\r\nRO0 ={Ro0:F4} RO90={Ro90:F4}\r\nDRO0 ={dRo0:F4}, DRO90 ={dRo90:F4}\"\r\n DE1 ={de1:F4}, DE2 ={de2:F4}\r\n\"MU={MU:F4}, P0={P0:F4}\r\n  \"DMu0Y={dMu0y:F4}, DMu90Y={dMu90y:F4}\"");
+
             // ------ 1-я область ------
             Console.WriteLine("1-я область ...");
+
             CalcOA(); // Вычисление начальных значений
             Calc1();  // Основные расчеты для 1-й области
             OutRes1(); // Вывод результатов для 1-й области
+            Console.WriteLine();
 
             // ------ 2-я область ------
-            Console.WriteLine();
             Console.WriteLine("2-я область ...");
+
             Move12(); // Подготовка данных для 2-й области
             CalcOO(); // Вычисление начальных значений для 2-й области
             Calc2();  // Основные расчеты для 2-й области
             OutRes2(); // Вывод результатов для 2-й области
             Console.WriteLine();
-            Console.WriteLine("3-я область ...");
+
             // ------ 3-я область ------
+            Console.WriteLine("3-я область ...");
+
             //Move23(); // Подготовка данных для 3-й области
             Calc3();  // Основные расчеты для 3-й области
             OutRes3(); // Вывод результатов для 3-й области
+
             string filePath = "результат.txt";
-            
-          
+
             using (StreamWriter writer = new StreamWriter(filePath))
             {
                 writer.WriteLine(Obl1.ToText());
                 writer.WriteLine(Obl2.ToText());
                 writer.WriteLine(Obl3.ToText());
             }
-            Console.WriteLine($"Данные успешно записаны в файл. {Path.GetFullPath(filePath)}") ;
+
+            Console.WriteLine($"Данные успешно записаны в файл. {Path.GetFullPath(filePath)}");
+
             // ----- Очистка -----
             Done(); // Освобождение ресурсов
             Console.ReadKey();
         }
     }
-
-   
 }
